@@ -61,7 +61,8 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Departments/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var department = GetDepartmentById(id);
+            return View(department);
         }
 
         // GET: Departments/Create
@@ -73,15 +74,30 @@ namespace Workforce_Silver_Snakes.Controllers
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(DepartmentsViewModel department)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO Department (Name)
+                                            OUTPUT INSERTED.Id
+                                            VALUES (@name)";
 
-                return RedirectToAction(nameof(Index));
+                        cmd.Parameters.Add(new SqlParameter("@name", department.Name));
+
+                        var id = (int)cmd.ExecuteScalar();
+                        department.Id = id;
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
             }
@@ -130,6 +146,40 @@ namespace Workforce_Silver_Snakes.Controllers
             catch
             {
                 return View();
+            }
+        }
+
+        private DepartmentsViewModel GetDepartmentById(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT d.Id, d.[Name], d.Budget, COUNT(e.DepartmentId) as 'Employees'
+                                        FROM Department d
+                                        LEFT JOIN Employee e
+                                        ON	e.DepartmentId = d.Id
+                                        WHERE d.id = @id
+                                        GROUP BY d.Name, d.Id, d.Budget ";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    var reader = cmd.ExecuteReader();
+                    DepartmentsViewModel department = null;
+
+                    if (reader.Read())
+                    {
+                        department = new DepartmentsViewModel()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                            Employees = reader.GetInt32(reader.GetOrdinal("Employees"))
+                        };
+                    
+                    }
+                    reader.Close();
+                    return department;
+                }
             }
         }
     }
