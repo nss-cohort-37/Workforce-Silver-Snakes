@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Workforce_Silver_Snakes.Models;
 
 namespace Workforce_Silver_Snakes.Controllers
@@ -36,100 +37,57 @@ namespace Workforce_Silver_Snakes.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT o.[Name] AS OwnerName, n.[Name] AS 'Neighborhood Name', Count(d.[Name]) AS 'Number of Dogs'
-                        FROM Owner o
-                        LEFT JOIN Neighborhood n 
-                        ON n.Id = o.NeighborhoodId
-                        LEFT JOIN Dog d 
-                        ON d.OwnerId = o.Id 
-                        GROUP BY o.[Name], n.[Name]";
+                    cmd.CommandText = @"
+                    SELECT c.Id, c.PurchaseDate, c.Make, c.Model
+                    FROM Computer c";
 
 
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    var reader = cmd.ExecuteReader();
 
-
-                    var neighborhoodOwnersViewModels = new List<NeighborhoodOwnersViewModel>();
-
-
-
+                    
+                   List<Computer> computers = new List<Computer>();
                     while (reader.Read())
                     {
-                        var existingNeighborhood = neighborhoodOwnersViewModels.FirstOrDefault(n => {
-                            return n.NeighborhoodName == reader.GetString(reader.GetOrdinal("Neighborhood Name"));
-                        }
-                        );
-                        if (existingNeighborhood == null)
-                        {
+                        
 
-
-                            var neighborhoodOwnerViewModel = new NeighborhoodOwnersViewModel
+                            Computer computer = new Computer
                             {
-                                NeighborhoodName = reader.GetString(reader.GetOrdinal("Neighborhood Name")),
-                                OwnerViewModels = new List<OwnerViewModel>()
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                                Make = reader.GetString(reader.GetOrdinal("Make")),
+                                Model = reader.GetString(reader.GetOrdinal("Model"))
 
                             };
-
-                            neighborhoodOwnerViewModel.OwnerViewModels.Add(new OwnerViewModel()
-                            {
-
-                                OwnerName = reader.GetString(reader.GetOrdinal("OwnerName")),
-                                DogCount = reader.GetInt32(reader.GetOrdinal("Number of Dogs"))
-
-
-                            });
-
-                            neighborhoodOwnersViewModels.Add(neighborhoodOwnerViewModel);
-                        }
-                        else
-                        {
-                            existingNeighborhood.OwnerViewModels.Add(new OwnerViewModel()
-                            {
-
-                                OwnerName = reader.GetString(reader.GetOrdinal("OwnerName")),
-                                DogCount = reader.GetInt32(reader.GetOrdinal("Number of Dogs"))
-
-
-                            });
-                        }
-
-
+                                computers.Add(computer);
+                        
+                                
                     }
-
-                    var viewModel = new AllOwnersByNeighborhoodViewModel();
-                    viewModel.NeighborhoodOwnersViewModels = neighborhoodOwnersViewModels;
-
                     reader.Close();
 
-                    return View(viewModel);
+                    return View(computers);
                 }
             }
-
         }
 
-        // GET: Owner/Details/5
+        // GET: Computers/Details/5
         public ActionResult Details(int id)
 
         {
             return View();
         }
 
-
-
-        // GET: Owner/Create
+        // GET: Computers/Create
         public ActionResult Create()
-
         {
-            var viewModel = new AddOwnerViewModel()
-            {
-                NeighborhoodOptions = GetNeighborhoodOptions()
-            };
-            return View(viewModel);
+            return View();
         }
 
-        // POST: Owner/Create
+
+
+        //    // POST: Computers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(AddOwnerViewModel owner)
+        public ActionResult Create(Computer computer)
         {
             try
             {
@@ -140,17 +98,18 @@ namespace Workforce_Silver_Snakes.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"INSERT INTO Owner (Name, Address, NeighborhoodId, Phone )
+                        cmd.CommandText = @"INSERT INTO Computer (PurchaseDate, Make, Model)
                                             OUTPUT INSERTED.Id
-                                            VALUES (@name, @address, @neighborhoodId, @phone)";
+                                            VALUES (@purchaseDate, @make, @model)";
 
-                        cmd.Parameters.Add(new SqlParameter("@name", owner.FirstName + " " + owner.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@address", owner.Address));
-                        cmd.Parameters.Add(new SqlParameter("@neighborhoodId", owner.NeighborhoodId));
-                        cmd.Parameters.Add(new SqlParameter("@phone", owner.Phone));
+                        cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
+                        //cmd.Parameters.Add(new SqlParameter("@decomissionDate", computer.DecomissionDate));
+                        cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
+                        cmd.Parameters.Add(new SqlParameter("@model", computer.Model));
 
                         var id = (int)cmd.ExecuteScalar();
-                        owner.OwnerId = id;
+                        computer.Id = id;
+
 
                         return RedirectToAction(nameof(Index));
                     }
@@ -162,81 +121,81 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
 
-        private List<SelectListItem> GetNeighborhoodOptions()
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"SELECT Id, Name FROM Neighborhood";
+        //    private List<SelectListItem> GetComputersOptions()
+        //    {
+        //        using (SqlConnection conn = Connection)
+        //        {
+        //            conn.Open();
+        //            using (SqlCommand cmd = conn.CreateCommand())
+        //            {
+        //                cmd.CommandText = @"SELECT Id, Name FROM Computers";
 
 
 
-                    var reader = cmd.ExecuteReader();
-                    var options = new List<SelectListItem>();
+        //                var reader = cmd.ExecuteReader();
+        //                var options = new List<SelectListItem>();
 
-                    while (reader.Read())
-                    {
-                        var option = new SelectListItem()
-                        {
-                            Text = reader.GetString(reader.GetOrdinal("Name")),
-                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
-                        };
-                        options.Add(option);
-                    }
+        //                while (reader.Read())
+        //                {
+        //                    var option = new SelectListItem()
+        //                    {
+        //                        Text = reader.GetString(reader.GetOrdinal("Name")),
+        //                        Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+        //                    };
+        //                    options.Add(option);
+        //                }
 
 
-                    reader.Close();
-                    return options;
-                }
-            }
-        }
+        //                reader.Close();
+        //                return options;
+        //            }
+        //        }
+        //    }
 
-        // GET: Owner/Edit/5
+        // GET: Computers/Edit/5
         public ActionResult Edit(int id)
         {
             return View();
         }
 
-        // POST: Owner/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
+        //    // POST: Computers/Edit/5
+        //    [HttpPost]
+        //    [ValidateAntiForgeryToken]
+        //    public ActionResult Edit(int id, IFormCollection collection)
+        //    {
+        //        try
+        //        {
+        //            // TODO: Add update logic here
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //        catch
+        //        {
+        //            return View();
+        //        }
+        //    }
 
-        // GET: Owner/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+        //    // GET: Computers/Delete/5
+        //    public ActionResult Delete(int id)
+        //    {
+        //        return View();
+        //    }
 
-        // POST: Owner/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
+        //    // POST: Computers/Delete/5
+        //    [HttpPost]
+        //    [ValidateAntiForgeryToken]
+        //    public ActionResult Delete(int id, IFormCollection collection)
+        //    {
+        //        try
+        //        {
+        //            // TODO: Add delete logic here
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //        catch
+        //        {
+        //            return View();
+        //        }
+        //    }
     }
 }
