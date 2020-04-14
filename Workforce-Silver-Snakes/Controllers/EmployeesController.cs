@@ -73,9 +73,11 @@ namespace Workforce_Silver_Snakes.Controllers
         public ActionResult Create()
         {
             var departmentOptions = GetDepartmentOptions();
+            var computerOptions = GetAvailableComputers();
             var viewModel = new EmployeeAddViewModel()
             {
-                DepartmentOptions = departmentOptions
+                DepartmentOptions = departmentOptions,
+                ComputerOptions = computerOptions
             };
             return View(viewModel);
         }
@@ -83,15 +85,35 @@ namespace Workforce_Silver_Snakes.Controllers
         // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Employee employee)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId, ComputerId, Email)
+                                            OUTPUT INSERTED.Id
+                                            VALUES (@firstName, @lastName, @departmentId, @computerId, @email)";
 
-                return RedirectToAction(nameof(Index));
+                        cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
+                        cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
+
+
+                        var id = (int)cmd.ExecuteScalar();
+                        employee.Id = id;
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
             }
@@ -158,6 +180,35 @@ namespace Workforce_Silver_Snakes.Controllers
                         var option = new SelectListItem()
                         {
                             Text = reader.GetString(reader.GetOrdinal("Name")),
+                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+
+                        };
+                        options.Add(option);
+                    }
+                    reader.Close();
+                    return options;
+                }
+            }
+        }
+        private List<SelectListItem> GetAvailableComputers()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT c.Id, CONCAT(c.Make, ' ', c.Model) as 'Computer' FROM Computer c
+                                      LEFT JOIN Employee e
+                                      ON e.ComputerId = c.Id
+                                      WHERE e.ComputerId IS NULL";
+                    var reader = cmd.ExecuteReader();
+                    var options = new List<SelectListItem>();
+
+                    while (reader.Read())
+                    {
+                        var option = new SelectListItem()
+                        {
+                            Text = reader.GetString(reader.GetOrdinal("Computer")),
                             Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
 
                         };
