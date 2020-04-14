@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Workforce_Silver_Snakes.Models;
 using Workforce_Silver_Snakes.Models.ViewModels;
 
 namespace Workforce_Silver_Snakes.Controllers
@@ -68,13 +69,14 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Departments/Create
         public ActionResult Create()
         {
-            return View();
+            var viewModel = new DepartmentsViewModel();
+            return View(viewModel);
         }
 
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(DepartmentsViewModel department)
+        public ActionResult Create(Department department)
         {
             try
             {
@@ -83,14 +85,16 @@ namespace Workforce_Silver_Snakes.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"INSERT INTO Department (Name)
+                        cmd.CommandText = @"INSERT INTO Department (Name, Budget)
                                             OUTPUT INSERTED.Id
-                                            VALUES (@name)";
+                                            VALUES (@name, @budget)";
 
                         cmd.Parameters.Add(new SqlParameter("@name", department.Name));
+                        cmd.Parameters.Add(new SqlParameter("@budget", department.Budget));
 
                         var id = (int)cmd.ExecuteScalar();
                         department.Id = id;
+
                         return RedirectToAction(nameof(Index));
                     }
                 }
@@ -106,21 +110,45 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Departments/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var department = GetDepartmentById(id);
+            return View(department);
         }
 
         // POST: Departments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Department department)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Department
+                                           SET Name = @name,
+                                               Budget = @budget
+                                               WHERE Id = @id";
 
-                return RedirectToAction(nameof(Index));
+                        cmd.Parameters.Add(new SqlParameter("@name", department.Name));
+                        cmd.Parameters.Add(new SqlParameter("@budget", department.Budget));
+
+
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return RedirectToAction(nameof(Index));
+                        }
+                        throw new Exception("No rows affected");
+
+
+                    }
+                }
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
             }
@@ -129,21 +157,32 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Departments/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var department = GetDepartmentById(id);
+            return View(department);
         }
 
         // POST: Departments/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Department department)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "DELETE FROM Department WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
             }
