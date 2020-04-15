@@ -41,6 +41,7 @@ namespace Workforce_Silver_Snakes.Controllers
                     SELECT c.Id, c.PurchaseDate, c.Make, c.Model
                     FROM Computer c
                     WHERE 1=1";
+
                     if (searchString != null)
                     {
                         cmd.CommandText += " AND Make LIKE @searchString OR Model LIKE @searchString";
