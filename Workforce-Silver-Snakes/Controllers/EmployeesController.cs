@@ -66,7 +66,67 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Employees/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, d.Name, c.Make, c.Model, t.Id trainingProgramId, t.Name as TrainingProgram, t.StartDate, t.EndDate 
+                                        FROM Employee e
+                                        LEFT JOIN Department d
+                                        ON e.DepartmentId = d.Id
+                                        LEFT JOIN Computer c
+                                        ON e.ComputerId = c.Id
+                                        LEFT JOIN EmployeeTraining et
+                                        ON et.EmployeeId = e.Id
+                                        LEFT JOIN TrainingProgram t
+                                        ON et.TrainingProgramId = t.Id
+                                        WHERE e.Id = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    var reader = cmd.ExecuteReader();
+                    EmployeeAddViewModel employee = null;
+
+                   while (reader.Read())
+                    {
+                        if (employee == null)
+                        {
+                            employee = new EmployeeAddViewModel
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                Computer = new Computer()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                    Make = reader.GetString(reader.GetOrdinal("Make")),
+                                    Model = reader.GetString(reader.GetOrdinal("Model"))
+                                },
+                                Department = new Department()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
+                                },
+                                TrainingPrograms = new List<TrainingProgram>()
+                            };
+                        }
+                        if (!reader.IsDBNull(reader.GetOrdinal("trainingProgramId")))
+                        {
+                            employee.TrainingPrograms.Add(new TrainingProgram()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("trainingProgramId")),
+                                Name = reader.GetString(reader.GetOrdinal("TrainingProgram")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
+                            });
+                        }
+                    }
+                    reader.Close();
+                    return View(employee);
+                }
+            }
         }
 
         // GET: Employees/Create
