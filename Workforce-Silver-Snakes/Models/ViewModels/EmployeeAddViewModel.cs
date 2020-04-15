@@ -24,8 +24,10 @@ namespace Workforce_Silver_Snakes.Models.ViewModels
 
         public int ComputerId { get; set; }
         public Department Department { get; set; }
+        public Computer Computer { get; set; }
         public List<SelectListItem> DepartmentOptions { get; set; }
         public List<SelectListItem> ComputerOptions { get; set; }
+        public List<TrainingProgram> TrainingPrograms { get; set; }
 
     }
 }

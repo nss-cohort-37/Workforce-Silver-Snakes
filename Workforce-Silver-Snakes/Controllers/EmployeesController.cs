@@ -71,7 +71,7 @@ namespace Workforce_Silver_Snakes.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, d.Name, c.Make, c.Model, t.Name as TrainingProgram, t.StartDate, t.EndDate 
+                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, d.Name, c.Make, c.Model, t.Id trainingProgramId, t.Name as TrainingProgram, t.StartDate, t.EndDate 
                                         FROM Employee e
                                         LEFT JOIN Department d
                                         ON e.DepartmentId = d.Id
@@ -81,42 +81,50 @@ namespace Workforce_Silver_Snakes.Controllers
                                         ON et.EmployeeId = e.Id
                                         LEFT JOIN TrainingProgram t
                                         ON et.TrainingProgramId = t.Id
-                                        WHERE e.Id = 1";
+                                        WHERE e.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     var reader = cmd.ExecuteReader();
                     EmployeeAddViewModel employee = null;
 
-                    while (reader.Read())
+                   while (reader.Read())
                     {
-                        employee = new EmployeeAddViewModel()
+                        if (employee == null)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            TrainingPrograms = new List<TrainingProgram>(),
-                            Computer = new Computer()
+                            employee = new EmployeeAddViewModel
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                                Make = reader.GetString(reader.GetOrdinal("Make")),
-                                Model = reader.GetString(reader.GetOrdinal("Model"))
-                            },
-                            Department = new Department()
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                                Name = reader.GetString(reader.GetOrdinal("Name"))
-                            },
-                        };
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                Computer = new Computer()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                    Make = reader.GetString(reader.GetOrdinal("Make")),
+                                    Model = reader.GetString(reader.GetOrdinal("Model"))
+                                },
+                                Department = new Department()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
+                                },
+                                TrainingPrograms = new List<TrainingProgram>()
+                            };
+                        }
+                        if (!reader.IsDBNull(reader.GetOrdinal("trainingProgramId")))
+                        {
                             employee.TrainingPrograms.Add(new TrainingProgram()
                             {
-
-                            })
-
+                                Id = reader.GetInt32(reader.GetOrdinal("trainingProgramId")),
+                                Name = reader.GetString(reader.GetOrdinal("TrainingProgram")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
+                            });
+                        }
                     }
                     reader.Close();
-                    return View(instructor);
+                    return View(employee);
                 }
             }
         }
