@@ -2,7 +2,13 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+    <div class="jumbotron">
+        <h1 class="display-4">Hello, world!</h1>
+        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <hr class="my-4">
+        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+        <a class="btn btn-success btn-lg"  role="button" asp-area="" asp-controller="Employees" asp-action="Index">Explore Employees</a>
+        <a class="btn btn-success btn-lg"  role="button" asp-area="" asp-controller="Computers" asp-action="Index">Explore Computers</a>
+        <a class="btn btn-success btn-lg"  role="button" asp-area="" asp-controller="Departments" asp-action="Index">Explore Departments</a>
+        <a class="btn btn-success btn-lg"  role="button" asp-area="" asp-controller="TrainingPrograms" asp-action="Index">Training Programs</a>
+    </div>
