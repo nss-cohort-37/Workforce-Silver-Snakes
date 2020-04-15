@@ -71,8 +71,7 @@ namespace Workforce_Silver_Snakes.Controllers
                                         FROM Department d
                                         LEFT JOIN Employee e
                                         ON	e.DepartmentId = d.Id
-                                        WHERE d.Id = @id
-                                        GROUP BY d.Name, d.Id, d.Budget, e.DepartmentId, e.FirstName, e.LastName, e.Id";
+                                        WHERE d.Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     var reader = cmd.ExecuteReader();
                     DepartmentsViewModel department = null;
@@ -90,13 +89,16 @@ namespace Workforce_Silver_Snakes.Controllers
                                 DeptEmployees = new List<Employee>()
                             };
                         }
-                        department.DeptEmployees.Add(new Employee()
+                        if(!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
-                        });
+                           department.DeptEmployees.Add(new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                            });
+                        }
                     }
                     reader.Close();
                     return View(department);
