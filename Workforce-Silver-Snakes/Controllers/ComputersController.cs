@@ -41,15 +41,14 @@ namespace Workforce_Silver_Snakes.Controllers
                     SELECT c.Id, c.PurchaseDate, c.Make, c.Model
                     FROM Computer c";
 
-
                     var reader = cmd.ExecuteReader();
 
                     
                    List<Computer> computers = new List<Computer>();
+
                     while (reader.Read())
                     {
                         
-
                             Computer computer = new Computer
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -73,7 +72,8 @@ namespace Workforce_Silver_Snakes.Controllers
         public ActionResult Details(int id)
 
         {
-            return View();
+            var computer = GetComputerById(id);
+            return View(computer);
         }
 
         // GET: Computers/Create
@@ -120,47 +120,18 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
 
-        //    private List<SelectListItem> GetComputersOptions()
-        //    {
-        //        using (SqlConnection conn = Connection)
-        //        {
-        //            conn.Open();
-        //            using (SqlCommand cmd = conn.CreateCommand())
-        //            {
-        //                cmd.CommandText = @"SELECT Id, Name FROM Computers";
-
-
-
-        //                var reader = cmd.ExecuteReader();
-        //                var options = new List<SelectListItem>();
-
-        //                while (reader.Read())
-        //                {
-        //                    var option = new SelectListItem()
-        //                    {
-        //                        Text = reader.GetString(reader.GetOrdinal("Name")),
-        //                        Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
-        //                    };
-        //                    options.Add(option);
-        //                }
-
-
-        //                reader.Close();
-        //                return options;
-        //            }
-        //        }
-        //    }
 
         // GET: Computers/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var computer = GetComputerById(id);
+            return View(computer);
         }
 
-        //    // POST: Computers/Edit/5
+        // POST: Computers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Computer computer)
         {
             try
             {
@@ -177,7 +148,8 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var computer = GetComputerById(id);
+            return View(computer);
         }
 
         // POST: Computers/Delete/5
@@ -188,12 +160,57 @@ namespace Workforce_Silver_Snakes.Controllers
             try
             {
                 // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "DELETE FROM Computer WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
+            }
+        }
+
+
+
+        // COMPUTER HELPER METHOD
+        private Computer GetComputerById(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, PurchaseDate, Make, Model FROM Computer WHERE Id = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    var reader = cmd.ExecuteReader();
+                    Computer computer = null;
+
+                    if (reader.Read())
+                    {
+                        computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Model = reader.GetString(reader.GetOrdinal("Model"))
+                        };
+
+                    }
+                    reader.Close();
+                    return computer;
+                }
             }
         }
     }
