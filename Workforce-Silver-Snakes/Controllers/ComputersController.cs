@@ -82,16 +82,13 @@ namespace Workforce_Silver_Snakes.Controllers
             return View();
         }
 
-
-
-        //    // POST: Computers/Create
+        // POST: Computers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(Computer computer)
         {
             try
             {
-                // TODO: Add insert logic here
 
                 using (SqlConnection conn = Connection)
                 {
@@ -135,10 +132,27 @@ namespace Workforce_Silver_Snakes.Controllers
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Computer
+                                            SET INSERTED.Id
+                                            VALUES (@purchaseDate, @make, @model)
+                                            WHERE";
 
-                return RedirectToAction(nameof(Index));
-            }
+                        cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
+                        cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
+                        cmd.Parameters.Add(new SqlParameter("@model", computer.Model));
+
+                        var id = (int)cmd.ExecuteScalar();
+                        computer.Id = id;
+
+                        return RedirectToAction(nameof(Index));
+
+                    }
+                }
             catch
             {
                 return View();
