@@ -122,7 +122,18 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Employees/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var employee = GetEmployeeById(id);
+            var departmentOptions = GetDepartmentOptions();
+            var computerOptions = GetUsersComputerOrAvailable(id);
+            var viewModel = new EmployeeAddViewModel()
+            {
+                DepartmentId = employee.DepartmentId,
+                ComputerId = employee.ComputerId,
+                LastName = employee.LastName,  
+                DepartmentOptions = departmentOptions,
+                ComputerOptions = computerOptions
+            };
+            return View(viewModel);
         }
 
         // POST: Employees/Edit/5
@@ -216,6 +227,71 @@ namespace Workforce_Silver_Snakes.Controllers
                     }
                     reader.Close();
                     return options;
+                }
+            }
+        }
+        private List<SelectListItem> GetUsersComputerOrAvailable(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT c.Id, CONCAT(c.Make, ' ', c.Model) as 'Computer' FROM Computer c
+                                        LEFT JOIN Employee e
+                                        ON e.ComputerId = c.Id
+                                        WHERE e.Id = @id
+                                        OR e.ComputerId IS NULL";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    var reader = cmd.ExecuteReader();
+                    var options = new List<SelectListItem>();
+
+                    while (reader.Read())
+                    {
+                        var option = new SelectListItem()
+                        {
+                            Text = reader.GetString(reader.GetOrdinal("Computer")),
+                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+
+                        };
+                        options.Add(option);
+                    }
+                    reader.Close();
+                    return options;
+                }
+            }
+        }
+        private Employee GetEmployeeById(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor FROM Employee e WHERE e.Id = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    var reader = cmd.ExecuteReader();
+                    Employee employee = null;
+
+                    if (reader.Read())
+                    {
+                        employee = new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                            ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
+                        };
+
+                    }
+                    reader.Close();
+                    return employee;
                 }
             }
         }
