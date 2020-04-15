@@ -16,6 +16,7 @@ namespace Workforce_Silver_Snakes.Models.ViewModels
 
         [Display(Name = "Employee Count")]
         public int Employees { get; set; }
+        public List<Employee> DeptEmployees { get; set; }
 
     }
 }

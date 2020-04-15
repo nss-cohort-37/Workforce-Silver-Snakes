@@ -62,8 +62,45 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Departments/Details/5
         public ActionResult Details(int id)
         {
-            var department = GetDepartmentById(id);
-            return View(department);
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT d.Id, d.[Name], d.Budget, e.DepartmentId, e.FirstName, e.LastName, e.Id As EmployeeId
+                                        FROM Department d
+                                        LEFT JOIN Employee e
+                                        ON	e.DepartmentId = d.Id
+                                        WHERE d.Id = @id
+                                        GROUP BY d.Name, d.Id, d.Budget, e.DepartmentId, e.FirstName, e.LastName, e.Id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    var reader = cmd.ExecuteReader();
+                    DepartmentsViewModel department = null;
+
+                    while (reader.Read())
+                    {
+                        if(department == null)
+                        {
+                            department = new DepartmentsViewModel
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                                DeptEmployees = new List<Employee>()
+                            };
+                        }
+                        department.DeptEmployees.Add(new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                        });
+                    }
+                    reader.Close();
+                    return View(department);
+                }
+            }
         }
 
         // GET: Departments/Create
