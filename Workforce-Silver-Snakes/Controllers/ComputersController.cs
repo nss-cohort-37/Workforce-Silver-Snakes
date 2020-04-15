@@ -29,7 +29,7 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
         // GET: Computers
-        public IActionResult Index()
+        public IActionResult Index(string searchString)
 
         {
             using (SqlConnection conn = Connection)
@@ -39,12 +39,16 @@ namespace Workforce_Silver_Snakes.Controllers
                 {
                     cmd.CommandText = @"
                     SELECT c.Id, c.PurchaseDate, c.Make, c.Model
-                    FROM Computer c";
-
+                    FROM Computer c
+                    WHERE 1=1";
+                    if (searchString != null)
+                    {
+                        cmd.CommandText += " AND Make LIKE @searchString OR Model LIKE @searchString";
+                        cmd.Parameters.Add(new SqlParameter("@searchString", "%" + searchString + "%"));
+                    }
                     var reader = cmd.ExecuteReader();
 
-                    
-                   List<Computer> computers = new List<Computer>();
+                    List < Computer > computers = new List<Computer>();
 
                     while (reader.Read())
                     {

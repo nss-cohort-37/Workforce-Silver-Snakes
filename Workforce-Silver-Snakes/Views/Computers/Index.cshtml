@@ -5,18 +5,16 @@
 }
 
 <h1>Index</h1>
-
 <p>
     <a asp-action="Create">Add Computer</a>
 </p>
 
-<div class="input-group">
-    <div class="input-group-prepend">
-        <span class="input-group-text">Make or Model</span>
-    </div>
-    <input type="text" aria-label="Make" class="form-control">
-    <input type="text" aria-label="Model" class="form-control">
-</div>
+<form asp-controller="Computers" asp-action="Index">
+    <p>
+        Make or Model: <input type="text" name="SearchString">
+        <input type="submit" value="Filter" />
+    </p>
+</form>
 
 <table class="table">
     <thead>
