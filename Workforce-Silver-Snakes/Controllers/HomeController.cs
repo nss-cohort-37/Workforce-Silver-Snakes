@@ -23,6 +23,11 @@ namespace Workforce_Silver_Snakes.Controllers
             return View();
         }
 
+        public IActionResult Computers()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();
