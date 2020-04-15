@@ -138,22 +138,29 @@ namespace Workforce_Silver_Snakes.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"UPDATE Computer
-                                            SET INSERTED.Id
-                                            VALUES (@purchaseDate, @make, @model)
-                                            WHERE";
+                                            SET PurchaseDate = @purchaseDate,
+                                                Make = @make,
+                                                Model = @model
+                                            WHERE Id = @id";
 
                         cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
                         cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
                         cmd.Parameters.Add(new SqlParameter("@model", computer.Model));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                        var id = (int)cmd.ExecuteScalar();
-                        computer.Id = id;
+                        var rowsAffected = cmd.ExecuteNonQuery();
 
-                        return RedirectToAction(nameof(Index));
-
+                        if (rowsAffected < 1)
+                        {
+                            return NotFound();
+                        }
                     }
                 }
-            catch
+
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch(Exception ex)
             {
                 return View();
             }
