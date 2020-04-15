@@ -76,6 +76,7 @@ namespace Workforce_Silver_Snakes.Controllers
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     var reader = cmd.ExecuteReader();
                     DepartmentsViewModel department = null;
+                   
 
                     while (reader.Read())
                     {
