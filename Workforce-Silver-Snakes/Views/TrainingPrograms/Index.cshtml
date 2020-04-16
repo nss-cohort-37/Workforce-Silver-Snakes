@@ -9,6 +9,8 @@
 <p>
     <a asp-action="Create">Add Training Program</a>
 </p>
+<a class="btn btn-lg" role="button" asp-action="Index" asp-route-past="true">View Past Programs</a>
+<a class="btn btn-lg" role="button" asp-action="Index">View Future Programs</a>
 <table class="table">
     <thead>
         <tr>
@@ -33,8 +35,6 @@
     <tbody>
         @foreach (var item in Model)
         {
-            @if (item.StartDate > DateTime.Now)
-            {
                 <tr>
                     <td>
                         @Html.DisplayFor(modelItem => item.Id)
@@ -64,7 +64,7 @@
                         }
                     </td>
                 </tr>
-            }
         }
     </tbody>
 </table>
+
