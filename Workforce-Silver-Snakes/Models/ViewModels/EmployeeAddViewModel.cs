@@ -31,6 +31,6 @@ namespace Workforce_Silver_Snakes.Models.ViewModels
         public List<SelectListItem> TrainingProgramsOptions { get; set; }
         public List<int> TrainingProgramIds { get; set; }
         public List<TrainingProgram> TrainingPrograms { get; set; }
-
+        public List<EmployeeTraining> EmployeeTrainings { get; set; }
     }
 }

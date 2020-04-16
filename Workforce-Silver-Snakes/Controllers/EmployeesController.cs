@@ -263,12 +263,15 @@ namespace Workforce_Silver_Snakes.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult AssignTrainingPrograms(EmployeeAddViewModel employee)
         {
+            employee.EmployeeTrainings = GetEmployeeTrainings(employee.Id);
             foreach(var id in employee.TrainingProgramIds)
             {
-                AddSingleTrainingProgram(employee, id);
-            }
-           
-                  
+                    if (!employee.EmployeeTrainings.Any(et => et.TrainingProgramId == id))
+                    {
+                        AddSingleTrainingProgram(employee, id);
+                    }     
+
+            }                  
             return RedirectToAction("Details", new { employee.Id });
        
         }
@@ -359,6 +362,37 @@ namespace Workforce_Silver_Snakes.Controllers
                 }
             }
         }
+        private List<EmployeeTraining> GetEmployeeTrainings(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT et.Id, et.EmployeeId, et.TrainingProgramId
+                                        FROM EmployeeTraining et
+                                         WHERE EmployeeId = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    var reader = cmd.ExecuteReader();
+                    var employeeTrainings = new List<EmployeeTraining>();
+
+                    while (reader.Read())
+                    {
+                        employeeTrainings.Add(new EmployeeTraining()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                            TrainingProgramId = reader.GetInt32(reader.GetOrdinal("TrainingProgramId"))
+                        });
+
+                    }
+                    reader.Close();
+                    return employeeTrainings;
+                }
+            }
+        }
         private List<SelectListItem> GetUsersComputerOrAvailable(int id)
         {
             using (SqlConnection conn = Connection)
@@ -404,6 +438,7 @@ namespace Workforce_Silver_Snakes.Controllers
                         cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
                                             OUTPUT INSERTED.Id
                                             VALUES (@employeeId, @trainingProgramId)";
+                       
 
                         cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
                         cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgramId));
