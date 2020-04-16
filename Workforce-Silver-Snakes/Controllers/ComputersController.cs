@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Workforce_Silver_Snakes.Models;
+using Workforce_Silver_Snakes.Models.ViewModels;
 
 namespace Workforce_Silver_Snakes.Controllers
 {
@@ -83,13 +84,18 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Computers/Create
         public ActionResult Create()
         {
+            var EmployeeOptions = GetEmployeeOptions();
+            var ViewModel = new ComputerAddEmployeeViewModel()
+            {
+                EmployeeOptions = EmployeeOptions
+            };
             return View();
         }
 
         // POST: Computers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Computer computer)
+        public ActionResult Create(ComputerAddEmployeeViewModel computer)
         {
             try
             {
@@ -205,7 +211,34 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
 
+        private List<SelectListItem> GetEmployeeOptions()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, CONCAT(FirstName, ' ', LastName) AS FullName FROM Employee";
 
+                    var reader = cmd.ExecuteReader();
+                    var options = new List<SelectListItem>();
+
+                    while (reader.Read())
+                    {
+                        var option = new SelectListItem()
+                        {
+                            Text = reader.GetString(reader.GetOrdinal("FullName")),
+                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+                        };
+
+                        options.Add(option);
+
+                    }
+                    reader.Close();
+                    return options;
+                }
+            }
+        }
 
         // COMPUTER HELPER METHOD
         private Computer GetComputerById(int id)
