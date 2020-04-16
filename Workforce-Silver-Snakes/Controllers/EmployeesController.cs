@@ -327,7 +327,6 @@ namespace Workforce_Silver_Snakes.Controllers
                 }
             }
         }
-
         private List<SelectListItem> GetAvailableTrainingPrograms()
         {
             using (SqlConnection conn = Connection)
