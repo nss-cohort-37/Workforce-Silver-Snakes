@@ -1,4 +1,4 @@
-﻿@model Workforce_Silver_Snakes.Models.Computer
+﻿@model Workforce_Silver_Snakes.Models.ComputerAddEmployeeViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -34,9 +34,17 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Model)
         </dd>
+        <dt class="col-sm-2">
+            Employee Name
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.employee.FirstName) @Html.DisplayFor(model => model.employee.LastName)
+        </dd>
     </dl>
 </div>
 <div>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Delete", "Delete", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>
 </div>
+

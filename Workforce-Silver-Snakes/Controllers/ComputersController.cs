@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Workforce_Silver_Snakes.Models;
+using Workforce_Silver_Snakes.Models.ViewModels;
 
 namespace Workforce_Silver_Snakes.Controllers
 {
@@ -38,8 +39,10 @@ namespace Workforce_Silver_Snakes.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                    SELECT c.Id, c.PurchaseDate, c.Make, c.Model
+                    SELECT c.Id, c.PurchaseDate, c.Make, c.Model, e.FirstName, e.LastName, e.ComputerId
                     FROM Computer c
+                    LEFT JOIN Employee e
+                    ON e.ComputerId = c.Id
                     WHERE 1=1";
                     if (searchString != null)
                     {
@@ -48,22 +51,42 @@ namespace Workforce_Silver_Snakes.Controllers
                     }
                     var reader = cmd.ExecuteReader();
 
-                    List < Computer > computers = new List<Computer>();
+
+
+                    List<ComputerAddEmployeeViewModel> computers = new List<ComputerAddEmployeeViewModel>();
 
                     while (reader.Read())
                     {
-                        
-                            Computer computer = new Computer
+
+                        ComputerAddEmployeeViewModel computer = new ComputerAddEmployeeViewModel
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Model = reader.GetString(reader.GetOrdinal("Model"))
+
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("FirstName")))
+                        {
+                            computer.employee = new Employee
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                                Make = reader.GetString(reader.GetOrdinal("Make")),
-                                Model = reader.GetString(reader.GetOrdinal("Model"))
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName"))
 
                             };
-                                computers.Add(computer);
+                        }
+                        else
+                        {
+                            computer.employee = new Employee
+                            {
+                                FirstName = null
+                            };
+                        }
                         
-                                
+                        computers.Add(computer);
+
+
                     }
                     reader.Close();
 
@@ -83,13 +106,19 @@ namespace Workforce_Silver_Snakes.Controllers
         // GET: Computers/Create
         public ActionResult Create()
         {
-            return View();
+            var employee = GetEmployees();
+            var employeeOptions = GetEmployeeOptions();
+            var viewModel = new ComputerAddEmployeeViewModel()
+            {
+                EmployeeOptions = employeeOptions
+            };
+            return View(viewModel);
         }
 
         // POST: Computers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Computer computer)
+        public ActionResult Create(ComputerAddEmployeeViewModel computer)
         {
             try
             {
@@ -100,19 +129,31 @@ namespace Workforce_Silver_Snakes.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"INSERT INTO Computer (PurchaseDate, Make, Model)
-                                            OUTPUT INSERTED.Id
-                                            VALUES (@purchaseDate, @make, @model)";
+                                            OUTPUT INSERTED.Id 
+                                            VALUES (@purchaseDate, @make, @model);
+                                            ";
 
                         cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
                         cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
                         cmd.Parameters.Add(new SqlParameter("@model", computer.Model));
+                        cmd.Parameters.Add(new SqlParameter("@id", computer.EmployeeId));
 
                         var id = (int)cmd.ExecuteScalar();
                         computer.Id = id;
 
-
-                        return RedirectToAction(nameof(Index));
                     }
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Employee
+                                            SET ComputerId = @computerId
+                                            WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", computer.EmployeeId));
+                    cmd.Parameters.Add(new SqlParameter("@computerId", computer.Id));
+                    cmd.ExecuteNonQuery();
+
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
             }
             catch (Exception ex)
@@ -164,7 +205,7 @@ namespace Workforce_Silver_Snakes.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return View();
             }
@@ -205,36 +246,103 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
 
-
-
-        // COMPUTER HELPER METHOD
-        private Computer GetComputerById(int id)
+        private List<SelectListItem> GetEmployeeOptions()
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, PurchaseDate, Make, Model FROM Computer WHERE Id = @id";
+                    cmd.CommandText = "SELECT Id, CONCAT(FirstName, ' ', LastName) AS FullName FROM Employee";
+
+                    var reader = cmd.ExecuteReader();
+                    var options = new List<SelectListItem>();
+                    options.Add(new SelectListItem()
+                    {
+                        Text = "Unassigned",
+                        Value = null
+                    });
+
+                    while (reader.Read())
+                    {
+                        var option = new SelectListItem()
+                        {
+                            Text = reader.GetString(reader.GetOrdinal("FullName")),
+                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+                        };
+
+                        options.Add(option);
+
+                    }
+                    reader.Close();
+                    return options;
+                }
+            }
+        }
+
+        // COMPUTER HELPER METHOD
+        private ComputerAddEmployeeViewModel GetComputerById(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    SELECT c.Id, c.PurchaseDate, c.Make, c.Model, COALESCE(e.[FirstName] + ' ' + e.LastName, 'N/A' ) AS        EmployeeName, e.ComputerId
+                    FROM Computer c
+                    LEFT JOIN Employee e
+                    ON e.ComputerId = c.Id
+                    WHERE c.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     var reader = cmd.ExecuteReader();
-                    Computer computer = null;
+                    ComputerAddEmployeeViewModel computer = null;
 
                     if (reader.Read())
                     {
-                        computer = new Computer
+                        computer = new ComputerAddEmployeeViewModel
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Model = reader.GetString(reader.GetOrdinal("Model"))
+                            Model = reader.GetString(reader.GetOrdinal("Model")),
+                            employee = new Employee
+                            {
+                                FirstName = reader.GetString(reader.GetOrdinal("EmployeeName")),
+                            }
                         };
 
                     }
                     reader.Close();
                     return computer;
+                }
+            }
+        }
+        private List<Employee> GetEmployees()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName
+                                      FROM Employee e";
+                    var reader = cmd.ExecuteReader();
+                    var employees = new List<Employee>();
+
+                    while (reader.Read())
+                    {
+                        employees.Add(new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                        });
+                    }
+                    reader.Close();
+                    return employees;
                 }
             }
         }
