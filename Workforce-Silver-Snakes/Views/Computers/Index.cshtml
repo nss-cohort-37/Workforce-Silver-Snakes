@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Workforce_Silver_Snakes.Models.Computer>
+﻿@model IEnumerable<Workforce_Silver_Snakes.Models.ComputerAddEmployeeViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -31,7 +31,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Model)
             </th>
-            <th></th>
+            <th>
+                Employee Assignment
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -50,9 +52,18 @@
                 @Html.DisplayFor(modelItem => item.Model)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.employee.FirstName) @Html.DisplayFor(modelItem => item.employee.LastName)
+            </td>
+            <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new {  id=item.Id  })
+                @Html.ActionLink("Details", "Details", new { id = item.Id })
+                @if (item.employee.FirstName == null)
+                {
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                }
+                else
+                {
+                }
             </td>
         </tr>
 }
