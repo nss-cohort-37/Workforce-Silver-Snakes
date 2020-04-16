@@ -29,7 +29,7 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
         // GET: TrainingPrograms
-        public ActionResult Index()
+        public ActionResult Index(bool past)
         {
             using (SqlConnection conn = Connection)
             {
@@ -39,7 +39,17 @@ namespace Workforce_Silver_Snakes.Controllers
                     cmd.CommandText = @"
                         SELECT Id, [Name], StartDate, EndDate, MaxAttendees
                         FROM TrainingProgram
+                        WHERE 1 = 1
                     ";
+
+                    if (past == true)
+                    {
+                        cmd.CommandText += "AND StartDate < GETDATE()";
+                    }
+                    else
+                    {
+                        cmd.CommandText += "AND StartDate >= GETDATE()";
+                    }
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
