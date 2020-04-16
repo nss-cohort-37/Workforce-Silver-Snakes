@@ -236,16 +236,24 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
 
-        // GET: Employees/Delete/5
-        public ActionResult Delete(int id)
+        // GET: Employees/assign/5
+        public ActionResult AssignTrainingPrograms(int id)
         {
-            return View();
+            var employee = GetEmployeeById(id);
+            var trainingOptions = GetAvailableTrainingPrograms();
+            var viewModel = new EmployeeAddViewModel()
+            {
+                FirstName = employee.FirstName,
+                TrainingPrograms = employee.TrainingPrograms,
+                TrainingProgramsOptions = trainingOptions
+            };
+            return View(viewModel);
         }
 
-        // POST: Employees/Delete/5
+        // POST: Employees/assign/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult AssignTrainingPrograms(int id, IFormCollection collection)
         {
             try
             {
@@ -313,6 +321,39 @@ namespace Workforce_Silver_Snakes.Controllers
                 }
             }
         }
+
+        private List<SelectListItem> GetAvailableTrainingPrograms()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT t.Id, t.Name, t.StartDate, t.EndDate, t.MaxAttendees, COUNT(et.EmployeeId) Attendees
+                                        FROM EmployeeTraining et
+                                        LEFT JOIN TrainingProgram t
+                                        ON et.TrainingProgramId = t.Id
+                                        WHERE 1 = 1
+                                        Group BY t.Id, t.Name, StartDate, EndDate, MaxAttendees
+                                        HAVING COUNT(et.EmployeeId) < MaxAttendees";
+                    var reader = cmd.ExecuteReader();
+                    var options = new List<SelectListItem>();
+
+                    while(reader.Read())
+                    {
+                        var option = new SelectListItem()
+                        {
+                            Text = reader.GetString(reader.GetOrdinal("Name")),
+                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+
+                        };
+                        options.Add(option);
+                    }
+                    reader.Close();
+                    return options;
+                }
+            }
+        }
         private List<SelectListItem> GetUsersComputerOrAvailable(int id)
         {
             using (SqlConnection conn = Connection)
@@ -346,32 +387,49 @@ namespace Workforce_Silver_Snakes.Controllers
                 }
             }
         }
-        private Employee GetEmployeeById(int id)
+        private EmployeeAddViewModel GetEmployeeById(int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor FROM Employee e WHERE e.Id = @id";
+                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor, t.Id trainingProgramId, t.Name TrainingProgram, t.StartDate, t.EndDate 
+                                    FROM Employee e 
+                                    LEFT JOIN EmployeeTraining et
+                                    ON et.EmployeeId = e.Id
+                                    LEFT JOIN TrainingProgram t
+                                    ON et.TrainingProgramId = t.Id
+                                    WHERE e.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     var reader = cmd.ExecuteReader();
-                    Employee employee = null;
+                    EmployeeAddViewModel employee = null;
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
-                        employee = new Employee()
+                        if (employee == null)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
-                        };
-
+                            employee = new EmployeeAddViewModel
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                TrainingPrograms = new List<TrainingProgram>()
+                            };
+                        }
+                        if (!reader.IsDBNull(reader.GetOrdinal("trainingProgramId")))
+                        {
+                            employee.TrainingPrograms.Add(new TrainingProgram()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("trainingProgramId")),
+                                Name = reader.GetString(reader.GetOrdinal("TrainingProgram")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
+                            });
+                        }
                     }
                     reader.Close();
                     return employee;
