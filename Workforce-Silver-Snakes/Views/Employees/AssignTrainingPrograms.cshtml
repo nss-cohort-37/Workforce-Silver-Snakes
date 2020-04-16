@@ -4,7 +4,7 @@
     ViewData["Title"] = "AssignTrainingPrograms";
 }
 
-<h1>AssignTrainingPrograms</h1>
+<h1>Manage Training Programs</h1>
 
 <h4> @Model.FirstName @Model.LastName </h4>
 <hr />
@@ -12,27 +12,14 @@
     <div class="col-md-4">
         <form asp-action="AssignTrainingPrograms">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.TrainingPrograms)
-            </dt>
-            <ul>
-                @foreach (var program in Model.TrainingPrograms)
-                {
-                    <li>
-                        @Html.DisplayFor(modelItem => program.Name) @(program.StartDate < DateTime.Now ? "was attended on " + program.StartDate : "will be attended on " + program.StartDate)
-
-                    </li>
-                }
-            </ul>
             <div class="form-group">
                 <label asp-for="TrainingPrograms" class="control-label"></label>
-                <select asp-for="TrainingPrograms" asp-items="@Model.TrainingProgramsOptions" class="form-control">
-                    <option selected disabled>Please select a computer</option>
+                <select asp-for="TrainingProgramIds" asp-items="@Model.TrainingProgramsOptions" class="form-control" multiple>
                 </select>
                 <span asp-validation-for="TrainingPrograms" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="AssignTrainingPrograms" class="btn btn-primary" />
             </div>
         </form>
     </div>

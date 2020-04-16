@@ -213,7 +213,7 @@ namespace Workforce_Silver_Snakes.Controllers
                                                DepartmentId = @departmentId,
                                                ComputerId = @computerId
                                                WHERE Id = @id";
-
+                      
                         cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                         cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
@@ -241,31 +241,36 @@ namespace Workforce_Silver_Snakes.Controllers
         {
             var employee = GetEmployeeById(id);
             var trainingOptions = GetAvailableTrainingPrograms();
+            var trainingprogramIds = new List<int>();
+            foreach(var item in employee.TrainingPrograms)
+            {
+                trainingprogramIds.Add(item.Id);
+            }
             var viewModel = new EmployeeAddViewModel()
             {
                 FirstName = employee.FirstName,
                 LastName = employee.LastName,
-                TrainingPrograms = employee.TrainingPrograms,
+                TrainingProgramIds = trainingprogramIds,
                 TrainingProgramsOptions = trainingOptions
             };
             return View(viewModel);
         }
 
         // POST: Employees/assign/5
+
+            //FOR EACH HELPER METHOD
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AssignTrainingPrograms(int id, IFormCollection collection)
+        public ActionResult AssignTrainingPrograms(EmployeeAddViewModel employee)
         {
-            try
+            foreach(var id in employee.TrainingProgramIds)
             {
-                // TODO: Add delete logic here
-
-                return RedirectToAction(nameof(Index));
+                AddSingleTrainingProgram(employee, id);
             }
-            catch
-            {
-                return View();
-            }
+           
+                  
+            return RedirectToAction("Details", new { employee.Id });
+       
         }
         private List<SelectListItem> GetDepartmentOptions()
         {
@@ -388,7 +393,36 @@ namespace Workforce_Silver_Snakes.Controllers
                 }
             }
         }
-        private EmployeeAddViewModel GetEmployeeById(int id)
+        private ActionResult AddSingleTrainingProgram(EmployeeAddViewModel employee, int trainingProgramId)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+                                            OUTPUT INSERTED.Id
+                                            VALUES (@employeeId, @trainingProgramId)";
+
+                        cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
+                        cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgramId));
+
+                        var id = (int)cmd.ExecuteScalar();
+                 
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return View();
+    }
+}
+private EmployeeAddViewModel GetEmployeeById(int id)
         {
             using (SqlConnection conn = Connection)
             {
