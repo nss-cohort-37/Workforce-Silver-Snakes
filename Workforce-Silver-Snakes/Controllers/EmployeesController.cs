@@ -213,7 +213,7 @@ namespace Workforce_Silver_Snakes.Controllers
                                                DepartmentId = @departmentId,
                                                ComputerId = @computerId
                                                WHERE Id = @id";
-
+                      
                         cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                         cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
@@ -236,27 +236,44 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
 
-        // GET: Employees/Delete/5
-        public ActionResult Delete(int id)
+        // GET: Employees/assign/5
+        public ActionResult AssignTrainingPrograms(int id)
         {
-            return View();
+            var employee = GetEmployeeById(id);
+            var trainingOptions = GetAvailableTrainingPrograms();
+            var trainingprogramIds = new List<int>();
+            foreach(var item in employee.TrainingPrograms)
+            {
+                trainingprogramIds.Add(item.Id);
+            }
+            var viewModel = new EmployeeAddViewModel()
+            {
+                FirstName = employee.FirstName,
+                LastName = employee.LastName,
+                TrainingProgramIds = trainingprogramIds,
+                TrainingProgramsOptions = trainingOptions
+            };
+            return View(viewModel);
         }
 
-        // POST: Employees/Delete/5
+        // POST: Employees/assign/5
+
+            //FOR EACH HELPER METHOD
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult AssignTrainingPrograms(EmployeeAddViewModel employee)
         {
-            try
+            employee.EmployeeTrainings = GetEmployeeTrainings(employee.Id);
+            foreach(var id in employee.TrainingProgramIds)
             {
-                // TODO: Add delete logic here
+                    if (!employee.EmployeeTrainings.Any(et => et.TrainingProgramId == id))
+                    {
+                        AddSingleTrainingProgram(employee, id);
+                    }     
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            }                  
+            return RedirectToAction("Details", new { employee.Id });
+       
         }
         private List<SelectListItem> GetDepartmentOptions()
         {
@@ -313,6 +330,69 @@ namespace Workforce_Silver_Snakes.Controllers
                 }
             }
         }
+        private List<SelectListItem> GetAvailableTrainingPrograms()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT t.Id, t.Name, t.StartDate, t.EndDate, t.MaxAttendees, COUNT(et.EmployeeId) Attendees
+                                        FROM EmployeeTraining et
+                                        LEFT JOIN TrainingProgram t
+                                        ON et.TrainingProgramId = t.Id
+                                        WHERE 1 = 1
+                                        Group BY t.Id, t.Name, StartDate, EndDate, MaxAttendees
+                                        HAVING COUNT(et.EmployeeId) < MaxAttendees";
+                    var reader = cmd.ExecuteReader();
+                    var options = new List<SelectListItem>();
+
+                    while(reader.Read())
+                    {
+                        var option = new SelectListItem()
+                        {
+                            Text = reader.GetString(reader.GetOrdinal("Name")),
+                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+
+                        };
+                        options.Add(option);
+                    }
+                    reader.Close();
+                    return options;
+                }
+            }
+        }
+        private List<EmployeeTraining> GetEmployeeTrainings(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT et.Id, et.EmployeeId, et.TrainingProgramId
+                                        FROM EmployeeTraining et
+                                         WHERE EmployeeId = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    var reader = cmd.ExecuteReader();
+                    var employeeTrainings = new List<EmployeeTraining>();
+
+                    while (reader.Read())
+                    {
+                        employeeTrainings.Add(new EmployeeTraining()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                            TrainingProgramId = reader.GetInt32(reader.GetOrdinal("TrainingProgramId"))
+                        });
+
+                    }
+                    reader.Close();
+                    return employeeTrainings;
+                }
+            }
+        }
         private List<SelectListItem> GetUsersComputerOrAvailable(int id)
         {
             using (SqlConnection conn = Connection)
@@ -346,32 +426,79 @@ namespace Workforce_Silver_Snakes.Controllers
                 }
             }
         }
-        private Employee GetEmployeeById(int id)
+        private ActionResult AddSingleTrainingProgram(EmployeeAddViewModel employee, int trainingProgramId)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+                                            OUTPUT INSERTED.Id
+                                            VALUES (@employeeId, @trainingProgramId)";
+                       
+
+                        cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
+                        cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgramId));
+
+                        var id = (int)cmd.ExecuteScalar();
+                 
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return View();
+    }
+}
+private EmployeeAddViewModel GetEmployeeById(int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor FROM Employee e WHERE e.Id = @id";
+                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor, t.Id trainingProgramId, t.Name TrainingProgram, t.StartDate, t.EndDate 
+                                    FROM Employee e 
+                                    LEFT JOIN EmployeeTraining et
+                                    ON et.EmployeeId = e.Id
+                                    LEFT JOIN TrainingProgram t
+                                    ON et.TrainingProgramId = t.Id
+                                    WHERE e.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     var reader = cmd.ExecuteReader();
-                    Employee employee = null;
+                    EmployeeAddViewModel employee = null;
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
-                        employee = new Employee()
+                        if (employee == null)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
-                        };
-
+                            employee = new EmployeeAddViewModel
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                TrainingPrograms = new List<TrainingProgram>()
+                            };
+                        }
+                        if (!reader.IsDBNull(reader.GetOrdinal("trainingProgramId")))
+                        {
+                            employee.TrainingPrograms.Add(new TrainingProgram()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("trainingProgramId")),
+                                Name = reader.GetString(reader.GetOrdinal("TrainingProgram")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
+                            });
+                        }
                     }
                     reader.Close();
                     return employee;
