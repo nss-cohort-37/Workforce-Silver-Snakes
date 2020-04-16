@@ -7,7 +7,7 @@
 <h1>Details</h1>
 
 <div>
-    <h4>Employee</h4>
+    <h4>@Model.FirstName @Model.LastName</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -47,17 +47,17 @@
         <ul>
             @foreach (var program in Model.TrainingPrograms)
             {
-            <li>
-                @Html.DisplayFor(modelItem => program.Name) @(program.StartDate < DateTime.Now ? "was attended on " + program.StartDate : "will be attended on " + program.StartDate)
+                <li>
+                    @Html.DisplayFor(modelItem => program.Name) @(program.StartDate < DateTime.Now ? "was attended on " + program.StartDate : "will be attended on " + program.StartDate)
 
-            </li>
+                </li>
             }
-
         </ul>
-
-
     </dl>
 </div>
+        <div class="form-group">
+            <a asp-action="AssignTrainingPrograms" asp-route-id="@Model.Id" class="btn btn-secondary">Assign to training programs</a>
+        </div>
 <div>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>

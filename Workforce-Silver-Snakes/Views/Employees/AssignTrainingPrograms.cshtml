@@ -1,0 +1,34 @@
+﻿@model Workforce_Silver_Snakes.Models.ViewModels.EmployeeAddViewModel
+
+@{
+    ViewData["Title"] = "AssignTrainingPrograms";
+}
+
+<h1>Manage Training Programs</h1>
+
+<h4> @Model.FirstName @Model.LastName </h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-controller="Employees" asp-action="AssignTrainingPrograms">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="TrainingPrograms" class="control-label"></label>
+                <select asp-for="TrainingProgramIds" asp-items="@Model.TrainingProgramsOptions" class="form-control" multiple>
+                </select>
+                <span asp-validation-for="TrainingPrograms" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Assign Training Programs" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
