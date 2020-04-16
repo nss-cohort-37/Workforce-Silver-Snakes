@@ -244,6 +244,7 @@ namespace Workforce_Silver_Snakes.Controllers
             var viewModel = new EmployeeAddViewModel()
             {
                 FirstName = employee.FirstName,
+                LastName = employee.LastName,
                 TrainingPrograms = employee.TrainingPrograms,
                 TrainingProgramsOptions = trainingOptions
             };
