@@ -4,7 +4,6 @@
     ViewData["Title"] = "Details";
 }
 
-<h3>Details</h3>
 
 <div class="card border-success mb-3" style="max-width: 45rem;">
     <div class="card-header">
@@ -46,15 +45,21 @@
     </div>
     <div>
         <div class="cardButtons">
+            @if (Model.employee.FirstName == "N/A")
+            {
             <a asp-action="Delete"
                asp-route-id="@Model.Id" class="cardButtonIcon" type="button" data-toggle="tooltip" data-placement="left" title="Delete Computer" data-original-title="Delete Computer">
 
                 <img src="~/Icons/trash.svg" />
             </a>
+            }
+            else
+            { }
 
             <a asp-action="Index" class="cardButtonIcon" type="button" data-toggle="tooltip" data-placement="right" title="Back To List" data-original-title="Back To List">
                 <img src="~/Icons/list.svg" />
             </a>
+            
         </div>
     </div>
     </div>

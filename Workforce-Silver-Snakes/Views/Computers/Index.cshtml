@@ -56,27 +56,12 @@
                 @Html.DisplayFor(modelItem => item.employee.FirstName) @Html.DisplayFor(modelItem => item.employee.LastName)
             </td>
             <td class="tableIcons">
-                <a asp-action="Edit"
-                   asp-route-id="@item.Id" title="Edit">
-
-                    <img src="~/Icons/edit.svg" />
-                </a>
                 <a asp-action="Details"
                    asp-route-id="@item.Id" title="Details">
 
                     <img src="~/Icons/details.svg" />
                 </a>
-                @if (item.employee.FirstName == null)
-                {
-                    <a asp-action="Delete"
-                        asp-route-id="@item.Id" title="Delete">
-
-                    <img src="~/Icons/trash.svg" />
-                    </a>
-                }
-                else
-                {
-                }
+               
             </td>
         </tr>
 }
