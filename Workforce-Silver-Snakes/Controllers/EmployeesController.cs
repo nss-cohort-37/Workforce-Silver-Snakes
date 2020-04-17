@@ -154,7 +154,7 @@ namespace Workforce_Silver_Snakes.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId, ComputerId, Email)
+                        cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId, ComputerId, IsSupervisor, Email)
                                             OUTPUT INSERTED.Id
                                             VALUES (@firstName, @lastName, @departmentId, @computerId, @email)";
 
@@ -162,6 +162,7 @@ namespace Workforce_Silver_Snakes.Controllers
                         cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                         cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
+                        cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
                         cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
 
 
@@ -341,7 +342,7 @@ namespace Workforce_Silver_Snakes.Controllers
                                         FROM EmployeeTraining et
                                         LEFT JOIN TrainingProgram t
                                         ON et.TrainingProgramId = t.Id
-                                        WHERE 1 = 1
+                                        WHERE StartDate > GETDATE()
                                         Group BY t.Id, t.Name, StartDate, EndDate, MaxAttendees
                                         HAVING COUNT(et.EmployeeId) < MaxAttendees";
                     var reader = cmd.ExecuteReader();
@@ -486,6 +487,7 @@ private EmployeeAddViewModel GetEmployeeById(int id)
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
                                 DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                 TrainingPrograms = new List<TrainingProgram>()
                             };
                         }
