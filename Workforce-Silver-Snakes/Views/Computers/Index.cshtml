@@ -4,9 +4,9 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Computers</h1>
 <p>
-    <a asp-action="Create">Add Computer</a>
+    <a asp-action="Create"  type="button" class="btn btn-primary bg-primary border-primary" >Add Computer</a>
 </p>
 
 <form asp-controller="Computers" asp-action="Index">
@@ -55,11 +55,23 @@
                 @Html.DisplayFor(modelItem => item.employee.FirstName) @Html.DisplayFor(modelItem => item.employee.LastName)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id = item.Id })
+                <a asp-action="Edit"
+                   asp-route-id="@item.Id">
+
+                    <img src="~/Icons/edit.svg" />
+                </a>
+                <a asp-action="Details"
+                   asp-route-id="@item.Id">
+
+                    <img src="~/Icons/details.svg" />
+                </a>
                 @if (item.employee.FirstName == null)
                 {
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                    <a asp-action="Delete"
+                        asp-route-id="@item.Id">
+
+                    <img src="~/Icons/trash.svg" />
+                    </a>
                 }
                 else
                 {

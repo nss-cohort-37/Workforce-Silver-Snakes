@@ -4,7 +4,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Employees</h1>
 
 <p>
     <button asp-action="Create" type="button" class="btn btn-primary bg-primary border-primary" >Add Employee</button>
@@ -43,8 +43,17 @@
                 @Html.DisplayFor(modelItem => item.Department.Name)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id=item.Id }) 
+                <a asp-action="Edit"
+                   asp-route-id="@item.Id">
+
+                    <img src="~/Icons/edit.svg" />
+                </a>
+                <span> | </span>
+                <a asp-action="Details"
+                   asp-route-id="@item.Id">
+
+                    <img src="~/Icons/details.svg" />
+                </a>
             </td>
         </tr>
 }
