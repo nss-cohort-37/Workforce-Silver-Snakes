@@ -2057,7 +2057,7 @@ pre {
     border: 0
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
+.table-striped tbody tr:nth-of-type(even) {
     background-color: #ecf0f1
 }
 
@@ -5041,7 +5041,10 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
     background-color: #fff;
     background-clip: border-box;
     border: 1px solid rgba(0,0,0,0.125);
-    border-radius: 0.25rem
+    border-radius: 0.25rem;
+    margin: auto;
+    margin-top: 2rem;
+    
 }
 
     .card > hr {
