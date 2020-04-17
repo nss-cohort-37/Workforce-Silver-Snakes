@@ -19,6 +19,8 @@ namespace Workforce_Silver_Snakes.Models.ViewModels
         [Display(Name = "Department")]
         public int DepartmentId { get; set; }
         public string Email { get; set; }
+        [Display(Name = "Is employee a supervisor?")]
+
         public bool IsSupervisor { get; set; }
         [Display(Name = "Computer")]
 

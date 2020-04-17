@@ -164,54 +164,7 @@ namespace Workforce_Silver_Snakes.Controllers
         }
 
 
-        // GET: Computers/Edit/5
-        public ActionResult Edit(int id)
-        {
-            var computer = GetComputerById(id);
-            return View(computer);
-        }
-
-        // POST: Computers/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Computer computer)
-        {
-            try
-            {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"UPDATE Computer
-                                            SET PurchaseDate = @purchaseDate,
-                                                Make = @make,
-                                                Model = @model
-                                            WHERE Id = @id";
-
-                        cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
-                        cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
-                        cmd.Parameters.Add(new SqlParameter("@model", computer.Model));
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                        var rowsAffected = cmd.ExecuteNonQuery();
-
-                        if (rowsAffected < 1)
-                        {
-                            return NotFound();
-                        }
-                    }
-                }
-
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return View();
-            }
-        }
-
+        
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
