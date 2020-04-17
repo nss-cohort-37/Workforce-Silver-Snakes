@@ -4,59 +4,61 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+    <div class="card border-success mb-3" style="max-width: 45rem;">
+        <div class="card-header">
+            <h4>Add Employee</h4>
+        </div>
+            <div class="row card-body">
+                <div class="col-md-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="FirstName" class="control-label"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="LastName" class="control-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Email" class="control-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" asp-for="IsSupervisor" /> @Html.DisplayNameFor(model => model.IsSupervisor)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="DepartmentId" class="control-label"></label>
+                            <select asp-for="DepartmentId" asp-items="@Model.DepartmentOptions" class="form-control">
+                                <option selected disabled>Please Select a Cohort</option>
+                            </select>
+                            <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ComputerId" class="control-label"></label>
+                            <select asp-for="ComputerId" asp-items="@Model.ComputerOptions" class="form-control">
+                                <option selected disabled>Please select a computer</option>
+                            </select>
+                            <span asp-validation-for="ComputerId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                        </div>
+                    </form>
+                    <div class="cardButtons">
+                        <a asp-action="Index" class="cardButtonIcon" type="button" data-toggle="tooltip" data-placement="right" title="Back To List" data-original-title="Back To List">
+                            <img src="~/Icons/list.svg" />
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-<h4>Employee</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsSupervisor" /> @Html.DisplayNameFor(model => model.IsSupervisor)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="DepartmentId" class="control-label"></label>
-                <select asp-for="DepartmentId" asp-items="@Model.DepartmentOptions" class="form-control">
-                    <option selected disabled>Please Select a Cohort</option>
-                </select>
-                <span asp-validation-for="DepartmentId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ComputerId" class="control-label"></label>
-                <select asp-for="ComputerId" asp-items="@Model.ComputerOptions" class="form-control">
-                    <option selected disabled>Please select a computer</option>
-                </select>
-                <span asp-validation-for="ComputerId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+            @section Scripts {
+                @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+            }

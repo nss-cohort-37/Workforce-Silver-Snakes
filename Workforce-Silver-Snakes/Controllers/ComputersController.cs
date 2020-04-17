@@ -44,6 +44,7 @@ namespace Workforce_Silver_Snakes.Controllers
                     LEFT JOIN Employee e
                     ON e.ComputerId = c.Id
                     WHERE 1=1";
+
                     if (searchString != null)
                     {
                         cmd.CommandText += " AND Make LIKE @searchString OR Model LIKE @searchString";

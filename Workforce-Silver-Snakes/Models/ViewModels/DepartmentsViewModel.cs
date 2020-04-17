@@ -10,7 +10,7 @@ namespace Workforce_Silver_Snakes.Models.ViewModels
     {
         public int Id { get; set; }
 
-        [Display(Name = "Department Name")]
+        [Display(Name = "Department")]
         public string Name { get; set; }
         public int Budget { get; set; }
 

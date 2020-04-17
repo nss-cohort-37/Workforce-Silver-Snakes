@@ -4,52 +4,63 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
 
-<div>
-    <h4>Computer</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Id)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PurchaseDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PurchaseDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Make)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Make)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Model)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Model)
-        </dd>
-        <dt class="col-sm-2">
-            Employee Name
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.employee.FirstName) @Html.DisplayFor(model => model.employee.LastName)
-        </dd>
-    </dl>
-</div>
-<div>
-    @if (Model.employee.FirstName == "N/A")
-    {
-        @Html.ActionLink("Delete ", "Delete", new { id = Model.Id })
-    }
-    else 
-    {}
-<a asp-action="Index">Back to List</a>
-</div>
+<div class="card border-success mb-3" style="max-width: 45rem;">
+    <div class="card-header">
+        <h4>@Html.DisplayFor(model => model.Make) @Html.DisplayFor(model => model.Model)</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Id)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Id)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.PurchaseDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.PurchaseDate)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Make)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Make)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Model)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Model)
+            </dd>
+            <dt class="col-sm-2">
+                Employee
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.employee.FirstName) @Html.DisplayFor(model => model.employee.LastName)
+            </dd>
+        </dl>
+    </div>
+    <div>
+        <div class="cardButtons">
+            @if (Model.employee.FirstName == "N/A")
+            {
+            <a asp-action="Delete"
+               asp-route-id="@Model.Id" class="cardButtonIcon" type="button" data-toggle="tooltip" data-placement="left" title="Delete Computer" data-original-title="Delete Computer">
 
+                <img src="~/Icons/trash.svg" />
+            </a>
+            }
+            else
+            { }
+
+            <a asp-action="Index" class="cardButtonIcon" type="button" data-toggle="tooltip" data-placement="right" title="Back To List" data-original-title="Back To List">
+                <img src="~/Icons/list.svg" />
+            </a>
+            
+        </div>
+    </div>
+    </div>
 

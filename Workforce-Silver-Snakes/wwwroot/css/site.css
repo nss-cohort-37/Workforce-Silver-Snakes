@@ -12,11 +12,6 @@ a {
   color: #0366d6;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
   color: #fff;
@@ -68,4 +63,64 @@ body {
   width: 100%;
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
+}
+
+.tableHead {
+    border-radius: .5rem;
+}
+
+.cardButtons {
+    margin-left: 1rem;
+    margin-bottom: 1rem
+}
+
+.cardButtons img {
+    margin-right: 1rem
+}
+
+
+.card-header h4{
+    margin-top: 1rem;
+}
+
+.card-header img {
+    height: auto;
+    width: 80px;
+}
+
+.tableIcons img{
+    margin-right: 1rem;
+}
+
+.navLogo img {
+    width: 65px;
+    height: auto;
+}
+
+.jumbotronHeader {
+    display:flex;
+}
+
+.jumbotronHeader img {
+    width: 20rem;
+    height: auto;
+    margin:auto;
+    
+}
+
+.jumbotronTitle {
+    margin:auto;
+}
+
+.jumbotronButtons {
+    margin: auto 9.25%;
+
+}
+
+.jumobotronP {
+    margin-left: 5px;
+}
+
+.pageTitleHeads{
+    margin-top: 2rem
 }

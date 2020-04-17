@@ -2,7 +2,21 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps Boop with ASP.NET Core</a>.</p>
-</div>
+    <div class="jumbotron">
+        <div class="jumbotronHeader">
+        <img src="~/Images/undraw_performance_overview_p9bm.svg" />
+            <div class="jumbotronTitle">
+
+        <h1 class="display-4">Bangazon HR Portal</h1>
+        <p class="lead jumobotronP"> Use the links below to manage all internal processes.</p>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="jumbotronButtons">
+        <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="Employees" asp-action="Index">Explore Employees</a>
+        <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="Computers" asp-action="Index">Explore Computers</a>
+        <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="Departments" asp-action="Index">Explore Departments</a>
+        <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="TrainingPrograms" asp-action="Index">Explore Training Programs</a>
+
+        </div>
+    </div>
