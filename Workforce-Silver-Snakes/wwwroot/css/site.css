@@ -85,10 +85,38 @@ body {
 
 .card-header img {
     height: auto;
-    width: 80px
+    width: 80px;
 }
 
 .tableIcons img{
-    margin-right: 1rem
+    margin-right: 1rem;
 }
 
+.navLogo img {
+    width: 65px;
+    height: auto;
+}
+
+.jumbotronHeader {
+    display:flex;
+}
+
+.jumbotronHeader img {
+    width: 20rem;
+    height: auto;
+    margin:auto;
+    
+}
+
+.jumbotronTitle {
+    margin:auto;
+}
+
+.jumbotronButtons {
+    margin: auto 9.25%;
+
+}
+
+.jumobotronP {
+    margin-left: 5px;
+}

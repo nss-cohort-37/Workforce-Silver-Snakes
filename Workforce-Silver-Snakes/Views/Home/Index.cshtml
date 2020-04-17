@@ -3,12 +3,20 @@
 }
 
     <div class="jumbotron">
-        <h1 class="display-4">Hello, world!</h1>
-        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <div class="jumbotronHeader">
+        <img src="~/Images/undraw_performance_overview_p9bm.svg" />
+            <div class="jumbotronTitle">
+
+        <h1 class="display-4">Bangazon HR Portal</h1>
+        <p class="lead jumobotronP"> Use the links below to manage all internal processes.</p>
+            </div>
+        </div>
         <hr class="my-4">
-        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+        <div class="jumbotronButtons">
         <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="Employees" asp-action="Index">Explore Employees</a>
         <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="Computers" asp-action="Index">Explore Computers</a>
         <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="Departments" asp-action="Index">Explore Departments</a>
         <a class="btn btn-primary btn-lg"  role="button" asp-area="" asp-controller="TrainingPrograms" asp-action="Index">Explore Training Programs</a>
+
+        </div>
     </div>
