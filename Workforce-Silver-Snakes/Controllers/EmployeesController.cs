@@ -71,7 +71,7 @@ namespace Workforce_Silver_Snakes.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, d.Name, c.Make, c.Model, t.Id trainingProgramId, t.Name as TrainingProgram, t.StartDate, t.EndDate 
+                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor, d.Name, c.Make, c.Model, t.Id trainingProgramId, t.Name as TrainingProgram, t.StartDate, t.EndDate 
                                         FROM Employee e
                                         LEFT JOIN Department d
                                         ON e.DepartmentId = d.Id
@@ -97,6 +97,7 @@ namespace Workforce_Silver_Snakes.Controllers
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
                                 DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                 Computer = new Computer()
                                 {
@@ -156,7 +157,7 @@ namespace Workforce_Silver_Snakes.Controllers
                     {
                         cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId, ComputerId, IsSupervisor, Email)
                                             OUTPUT INSERTED.Id
-                                            VALUES (@firstName, @lastName, @departmentId, @computerId, @email)";
+                                            VALUES (@firstName, @lastName, @departmentId, @computerId, @isSupervisor, @email)";
 
                         cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
