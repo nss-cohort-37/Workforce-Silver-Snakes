@@ -56,13 +56,6 @@
             </td>
             <td>
                 @Html.ActionLink("Details", "Details", new { id = item.Id })
-                @if (item.employee.FirstName == null)
-                {
-                    @Html.ActionLink("Delete", " |Delete", new { id = item.Id })
-                }
-                else
-                {
-                }
             </td>
         </tr>
 }
