@@ -10,6 +10,7 @@ namespace Workforce_Silver_Snakes.Models
     public class ComputerAddEmployeeViewModel
     {
         public int Id { get; set; }
+        [Display(Name = "Purchased")]
         public DateTime PurchaseDate { get; set; }
         public DateTime DecomissionDate { get; set; }
         public string Make { get; set; }

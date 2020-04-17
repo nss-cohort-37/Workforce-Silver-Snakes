@@ -74,6 +74,10 @@ body {
     margin-bottom: 1rem
 }
 
+.cardButtons img {
+    margin-right: 1rem
+}
+
 
 .card-header h4{
     margin-top: 1rem;
@@ -82,5 +86,9 @@ body {
 .card-header img {
     height: auto;
     width: 80px
+}
+
+.tableIcons img{
+    margin-right: 1rem
 }
 

@@ -51,7 +51,7 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.MaxAttendees)
                     </td>
-                    <td>
+                    <td class="tableIcons">
                         @if (item.StartDate > DateTime.Now)
                         {
                         <a asp-action="Edit"
