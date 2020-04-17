@@ -9,16 +9,14 @@
     <a asp-action="Create"  type="button" class="btn btn-primary bg-primary border-primary" >Add Computer</a>
 </p>
 
-<form asp-controller="Computers" asp-action="Index">
-    <p>
-        Make or Model: <input type="text" name="searchString">
-        <input type="submit" value="Filter" />
-    </p>
+<form class="form-inline my-2 my-lg-0" asp-controller="Computers" asp-action="Index">
+    <input class="form-control mr-sm-2" type="text" name="searchString" placeholder="Filter Make/Model">
+    <button class="btn btn-secondary my-2 my-sm-0 compSearch" type="submit">Filter</button>
 </form>
 
-<table class="table">
+<table class="table table-hover table-striped">
     <thead>
-        <tr>
+        <tr class="table-primary">
             <th>
                 @Html.DisplayNameFor(model => model.Id)
             </th>
@@ -34,11 +32,14 @@
             <th>
                 Employee Assignment
             </th>
+            <th>
+
+            </th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
+        <tr scope="row">
             <td>
                 @Html.DisplayFor(modelItem => item.Id)
             </td>
@@ -56,19 +57,19 @@
             </td>
             <td>
                 <a asp-action="Edit"
-                   asp-route-id="@item.Id">
+                   asp-route-id="@item.Id" title="Edit">
 
                     <img src="~/Icons/edit.svg" />
                 </a>
                 <a asp-action="Details"
-                   asp-route-id="@item.Id">
+                   asp-route-id="@item.Id" title="Details">
 
                     <img src="~/Icons/details.svg" />
                 </a>
                 @if (item.employee.FirstName == null)
                 {
                     <a asp-action="Delete"
-                        asp-route-id="@item.Id">
+                        asp-route-id="@item.Id" title="Delete">
 
                     <img src="~/Icons/trash.svg" />
                     </a>
