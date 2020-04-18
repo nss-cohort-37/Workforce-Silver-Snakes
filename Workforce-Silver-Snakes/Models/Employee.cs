@@ -21,5 +21,7 @@ namespace Workforce_Silver_Snakes.Models
         public bool IsSupervisor { get; set; }
         public int ComputerId { get; set; }
         public Department Department { get; set; }
+        
+        public int ProfileAvatarId { get; set; }
     }
 }

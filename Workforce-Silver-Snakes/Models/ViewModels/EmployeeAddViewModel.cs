@@ -26,8 +26,12 @@ namespace Workforce_Silver_Snakes.Models.ViewModels
 
         public int ComputerId { get; set; }
 
+        public int ProfileAvatarId { get; set; }
+        public ProfileAvatar ProfileAvatar { get; set; }
         public Department Department { get; set; }
         public Computer Computer { get; set; }
+
+        public List<SelectListItem> ProfileAvatarOptions { get; set; }
         public List<SelectListItem> DepartmentOptions { get; set; }
         public List<SelectListItem> ComputerOptions { get; set; }
         public List<SelectListItem> TrainingProgramsOptions { get; set; }

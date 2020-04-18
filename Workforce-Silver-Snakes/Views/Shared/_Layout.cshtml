@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Workforce_Silver_Snakes</title>
+    <link rel="stylesheet" href="path/to/sweetmodal/dist/min/jquery.sweet-modal.min.css" />
+    
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
@@ -12,7 +14,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <span class="navLogo">
                 <a class="navbar-brand" href="Home">
-                    <img src="~/Images/B-Logo.png"/>
+                    <img src="~/Images/B-Logo.png" />
                 </a>
             </span>
 
@@ -34,7 +36,7 @@
                         <a class="nav-link" asp-area="" asp-controller="TrainingPrograms" asp-action="Index">Training Programs</a>
                     </li>
                 </ul>
-              
+
             </div>
         </nav>
     </header>
@@ -51,6 +53,7 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="path/to/sweetmodal/dist/min/jquery.sweet-modal.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>

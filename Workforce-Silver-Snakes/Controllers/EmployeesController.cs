@@ -71,7 +71,7 @@ namespace Workforce_Silver_Snakes.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor, d.Name, c.Make, c.Model, t.Id trainingProgramId, t.Name as TrainingProgram, t.StartDate, t.EndDate 
+                    cmd.CommandText = @"SELECT e.Id, e.ProfileAvatarId, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor, d.Name, c.Make, c.Model, t.Id trainingProgramId, t.Name as TrainingProgram, t.StartDate, t.EndDate, pa.Id as AvatarId, pa.AvatarPath 
                                         FROM Employee e
                                         LEFT JOIN Department d
                                         ON e.DepartmentId = d.Id
@@ -81,7 +81,10 @@ namespace Workforce_Silver_Snakes.Controllers
                                         ON et.EmployeeId = e.Id
                                         LEFT JOIN TrainingProgram t
                                         ON et.TrainingProgramId = t.Id
+                                        LEFT JOIN ProfileAvatar pa
+                                        ON pa.Id = e.ProfileAvatarId
                                         WHERE e.Id = @id";
+
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
@@ -95,6 +98,7 @@ namespace Workforce_Silver_Snakes.Controllers
                             employee = new EmployeeAddViewModel
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                ProfileAvatarId = reader.GetInt32(reader.GetOrdinal("ProfileAvatarId")),
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
                                 IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
@@ -109,6 +113,11 @@ namespace Workforce_Silver_Snakes.Controllers
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                     Name = reader.GetString(reader.GetOrdinal("Name"))
+                                },
+                                ProfileAvatar = new ProfileAvatar()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("AvatarId")),
+                                    AvatarPath = reader.GetString(reader.GetOrdinal("AvatarPath"))
                                 },
                                 TrainingPrograms = new List<TrainingProgram>()
                             };
@@ -134,11 +143,13 @@ namespace Workforce_Silver_Snakes.Controllers
         public ActionResult Create()
         {
             var departmentOptions = GetDepartmentOptions();
+            var profileAvatarOptions = GetProfileAvatarOptions();
             var computerOptions = GetAvailableComputers();
             var viewModel = new EmployeeAddViewModel()
             {
                 DepartmentOptions = departmentOptions,
-                ComputerOptions = computerOptions
+                ComputerOptions = computerOptions,
+                ProfileAvatarOptions = profileAvatarOptions
             };
             return View(viewModel);
         }
@@ -155,10 +166,11 @@ namespace Workforce_Silver_Snakes.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId, ComputerId, IsSupervisor, Email)
+                        cmd.CommandText = @"INSERT INTO Employee (ProfileAvatarId, FirstName, LastName, DepartmentId, ComputerId, IsSupervisor, Email)
                                             OUTPUT INSERTED.Id
-                                            VALUES (@firstName, @lastName, @departmentId, @computerId, @isSupervisor, @email)";
+                                            VALUES (@profileAvatarId, @firstName, @lastName, @departmentId, @computerId, @isSupervisor, @email)";
 
+                        cmd.Parameters.Add(new SqlParameter("@profileAvatarId", employee.ProfileAvatarId));
                         cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                         cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
@@ -191,7 +203,7 @@ namespace Workforce_Silver_Snakes.Controllers
             {
                 DepartmentId = employee.DepartmentId,
                 ComputerId = employee.ComputerId,
-                LastName = employee.LastName,  
+                LastName = employee.LastName,
                 DepartmentOptions = departmentOptions,
                 ComputerOptions = computerOptions
             };
@@ -458,19 +470,47 @@ namespace Workforce_Silver_Snakes.Controllers
                 return View();
     }
 }
-private EmployeeAddViewModel GetEmployeeById(int id)
+        private List<SelectListItem> GetProfileAvatarOptions()
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor, t.Id trainingProgramId, t.Name TrainingProgram, t.StartDate, t.EndDate 
+                    cmd.CommandText = "SELECT Id, AvatarPath FROM ProfileAvatar";
+                    var reader = cmd.ExecuteReader();
+                    var options = new List<SelectListItem>();
+
+                    while (reader.Read())
+                    {
+                        var option = new SelectListItem()
+                        {
+                            Text = reader.GetString(reader.GetOrdinal("AvatarPath")),
+                            Value = reader.GetInt32(reader.GetOrdinal("Id")).ToString()
+
+                        };
+                        options.Add(option);
+                    }
+                    reader.Close();
+                    return options;
+                }
+            }
+        }
+        private EmployeeAddViewModel GetEmployeeById(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT e.Id, e.ProfileAvatarId, e.FirstName, e.LastName, e.DepartmentId, e.ComputerId, e.IsSupervisor, t.Id trainingProgramId, t.Name TrainingProgram, t.StartDate, t.EndDate, pa.Id as AvatarId, pa.AvatarPath
                                     FROM Employee e 
                                     LEFT JOIN EmployeeTraining et
                                     ON et.EmployeeId = e.Id
                                     LEFT JOIN TrainingProgram t
                                     ON et.TrainingProgramId = t.Id
+                                    LEFT JOIN ProfileAvatar pa
+                                    ON pa.Id = e.ProfileAvatarId
                                     WHERE e.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -485,11 +525,17 @@ private EmployeeAddViewModel GetEmployeeById(int id)
                             employee = new EmployeeAddViewModel
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                ProfileAvatarId = reader.GetInt32(reader.GetOrdinal("ProfileAvatarId")),
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
                                 DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                 ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                                TrainingPrograms = new List<TrainingProgram>()
+                                TrainingPrograms = new List<TrainingProgram>(),
+                                ProfileAvatar = new ProfileAvatar() 
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("AvatarId")),
+                                    AvatarPath = reader.GetString(reader.GetOrdinal("AvatarPath"))
+                                }
                             };
                         }
                         if (!reader.IsDBNull(reader.GetOrdinal("trainingProgramId")))
@@ -507,6 +553,9 @@ private EmployeeAddViewModel GetEmployeeById(int id)
                     return employee;
                 }
             }
+
         }
+
     }
 }
+
