@@ -5,10 +5,15 @@
 }
 
 <h1>Employees</h1>
-
 <p>
     <a asp-action="Create" type="button" class="btn btn-primary bg-primary border-primary" >Add Employee</a>
 </p>
+
+<form class="form-inline my-2 my-lg-0" asp-controller="Employees" asp-action="Index">
+    <input class="form-control mr-sm-2" type="text" name="searchString" placeholder="Filter by First/Last name">
+    <button class="btn btn-secondary my-2 my-sm-0 compSearch" type="submit">Filter</button>
+</form>
+
 <table class="table table-hover table-striped">
     <thead>
         <tr class="table-primary">

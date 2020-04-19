@@ -27,7 +27,7 @@ namespace Workforce_Silver_Snakes.Controllers
             }
         }
         // GET: Employees
-        public ActionResult Index()
+        public ActionResult Index(string searchString)
         {
             using (SqlConnection conn = Connection)
             {
@@ -37,7 +37,14 @@ namespace Workforce_Silver_Snakes.Controllers
                     cmd.CommandText = @"SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, d.Name
                                       FROM Employee e
                                       LEFT JOIN Department d
-                                      ON e.DepartmentId = d.Id";
+                                      ON e.DepartmentId = d.Id
+                                      WHERE 1=1";
+
+                    if (searchString != null)
+                    {
+                        cmd.CommandText += " AND FirstName Like @searchString OR LastName LIKE @searchstring";
+                        cmd.Parameters.Add(new SqlParameter("@searchString", "%" + searchString + "%"));
+                    }
                     var reader = cmd.ExecuteReader();
                     var employees = new List<Employee>();
 
@@ -148,7 +155,7 @@ namespace Workforce_Silver_Snakes.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Employee employee)
         {
-            try
+            try                                                             
             {
                 using (SqlConnection conn = Connection)
                 {
