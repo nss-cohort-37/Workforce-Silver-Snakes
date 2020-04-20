@@ -10,32 +10,29 @@
         </div>
        
             <div class="row card-body">
-                <div class="col-md-7">
+                <div class="col-md-8">
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        <div class="row card-body" style="padding: 0;">
+                        <div class="row card-body" style="margin-top: -3rem; padding:0.45rem;">
                             <div class="card text-white bg-light mb-3" style="width:auto; display:flex; flex-wrap:wrap; flex-direction:row; justify-content:space-evenly">
-
-
                                 @foreach (var avatar in Model.ProfileAvatarOptions)
                                 {
                                     <div class="card-body" style="margin:auto; padding: 0;">
                                         <div value="@avatar.Value" style="display:flex; ">
-                                            <img style="width:55px; " src="@($"/Images/profileAvatars/{avatar.Text}")" />
+                                            <img style="width:75px; " src="@($"/Images/profileAvatars/{avatar.Text}")" />
                                         </div>
                                     </div>
-
                                 }
                             </div>
                         </div>
 
                         <!-- BOOTSTRAP DROPDOWN -->
                         <div class="btn-group form-group">
-                            <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"> Avatar <span class="caret"></span></a>
+                            <a class="btn btn-primary" href="#"> Avatar </a>
                             <select asp-for="ProfileAvatarId" asp-items="@Model.ProfileAvatarOptions" class="form-control">
                             </select>
-                            <ul class="dropdown-menu">
+                            @*<ul class="dropdown-menu">
 
                                 @foreach (var avatar in Model.ProfileAvatarOptions)
                                 {
@@ -47,7 +44,7 @@
                                     </li>
 
                                 }
-                            </ul>
+                            </ul>*@
                             <span asp-validation-for="ProfileAvatar" class="text-danger"></span>
                         </div>
 
