@@ -4384,6 +4384,14 @@
    */
 
 
+    $(".dropdown-menu li a").click(function () {
+        var selText = $(this).text();
+        var imgSource = $(this).find('img').attr('src');
+        var img = '<img src="' + imgSource + '"/>';
+        $(this).parents('.btn-group').find('.dropdown-toggle').html(img + ' ' + selText + ' <span class="caret"></span>');
+    });
+
+
   $.fn[NAME$a] = Toast._jQueryInterface;
   $.fn[NAME$a].Constructor = Toast;
 

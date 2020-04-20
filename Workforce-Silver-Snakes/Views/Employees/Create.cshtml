@@ -4,41 +4,51 @@
     ViewData["Title"] = "Create";
 }
 
-    <div class="card border-success mb-3" style="max-width: 45rem;">
+    <div class="card border-success mb-3" style="max-width:45rem">
         <div class="card-header">
             <h4>Add Employee</h4>
         </div>
+       
             <div class="row card-body">
-                <div class="col-md-4">
+                <div class="col-md-7">
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                        <div class="row card-body" style="padding: 0;">
+                            <div class="card text-white bg-light mb-3" style="width:auto; display:flex; flex-wrap:wrap; flex-direction:row; justify-content:space-evenly">
 
-                        <div class="form-group">
-                            <label asp-for="ProfileAvatar" class="control-label"></label>
-                            <select asp-for="ProfileAvatarId" asp-items="@Model.ProfileAvatarOptions" class="form-control">
-                            </select>
-                            <span asp-validation-for="ProfileAvatarId" class="text-danger"></span>
+
+                                @foreach (var avatar in Model.ProfileAvatarOptions)
+                                {
+                                    <div class="card-body" style="margin:auto; padding: 0;">
+                                        <div value="@avatar.Value" style="display:flex; ">
+                                            <img style="width:55px; " src="@($"/Images/profileAvatars/{avatar.Text}")" />
+                                        </div>
+                                    </div>
+
+                                }
+                            </div>
                         </div>
 
-                        <ul>
-                            @foreach (var avatar in Model.ProfileAvatarOptions)
-                            {
-                            <li>
-                                <img src="~/Images/profileAvatars/@Html.DisplayFor(model => model.ProfileAvatar.AvatarPath)" />
-                                @Html.DisplayFor(model => model.ProfileAvatar.AvatarPath)
-
-
-                            </li>
-                            }
-                        </ul>
-
-                        <div class="form-group">
-                            <label asp-for="ProfileAvatar" class="control-label"></label>
+                        <!-- BOOTSTRAP DROPDOWN -->
+                        <div class="btn-group form-group">
+                            <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"> Avatar <span class="caret"></span></a>
                             <select asp-for="ProfileAvatarId" asp-items="@Model.ProfileAvatarOptions" class="form-control">
-                                @Html.DisplayFor(model => model.ProfileAvatar.AvatarPath)
-                                                    </select>
-                            <span asp-validation-for="ProfileAvatarId" class="text-danger"></span>
+                            </select>
+                            <ul class="dropdown-menu">
+
+                                @foreach (var avatar in Model.ProfileAvatarOptions)
+                                {
+
+                                    <li value="@avatar.Value" class="avatarSvg">
+                                        <a href="javascript:void(0);">
+                                            <img src="@($"/Images/profileAvatars/{avatar.Text}")" />
+                                        </a>
+                                    </li>
+
+                                }
+                            </ul>
+                            <span asp-validation-for="ProfileAvatar" class="text-danger"></span>
                         </div>
 
 
@@ -87,6 +97,10 @@
                     </div>
                 </div>
             </div>
+            
+       
+
+    </div>
 
 
             @section Scripts {
